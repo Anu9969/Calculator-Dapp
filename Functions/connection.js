@@ -13,6 +13,10 @@ const { Web3 } = require('web3');
 
 // Create Web3 instance
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+const Calculator = require('../build/contracts/Calculator.json');
+
+
+
 
 async function connection() {
     try {
@@ -34,4 +38,22 @@ connection()
         console.error("Failed to connect:", error);
     });
 
+
+    //fuction to create contract instance
+async function createContractInstance(){
+    var accounts = await web3.eth.getAccounts();
+    const networkId = await web3.eth.net.getId();
+    const {address} = Calculator.networks[networkId];
+    
+    var instance = await new web3.eth.Contract(
+        Calculator.abi,
+        address
+    )
+    console.log("Address:" , address);
+    return {instance, accounts};
+}
+
+
 module.exports = { web3, connection };
+
+createContractInstance();
