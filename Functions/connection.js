@@ -8,15 +8,11 @@
 //     account = await web3.eth.getAccounts();
 //     console.log("Connected to account: ", account[0]);
 // }
-
 const { Web3 } = require('web3');
+const Calculator = require('../build/contracts/Calculator.json');
 
 // Create Web3 instance
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-const Calculator = require('../build/contracts/Calculator.json');
-
-
-
 
 async function connection() {
     try {
@@ -29,31 +25,39 @@ async function connection() {
     }
 }
 
-// Test the connection
-connection()
-    .then((account) => {
-        console.log("Successfully connected to account:", account);
-    })
-    .catch((error) => {
-        console.error("Failed to connect:", error);
-    });
-
-
-    //fuction to create contract instance
-async function createContractInstance(){
-    var accounts = await web3.eth.getAccounts();
-    const networkId = await web3.eth.net.getId();
-    const {address} = Calculator.networks[networkId];
-    
-    var instance = await new web3.eth.Contract(
-        Calculator.abi,
-        address
-    )
-    console.log("Address:" , address);
-    return {instance, accounts};
+// Function to create contract instance
+async function createContractInstance() {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        const networkId = await web3.eth.net.getId();
+        const { address } = Calculator.networks[networkId];
+        
+        const instance = new web3.eth.Contract(
+            Calculator.abi,
+            address
+        );
+        console.log("Contract Address:", address);
+        return { instance, accounts };
+    } catch (error) {
+        console.error("Error creating contract instance:", error);
+        throw error;
+    }
 }
 
+// Test the connection and contract instance creation
+async function testSetup() {
+    try {
+        const account = await connection();
+        console.log("Successfully connected to account:", account);
+        
+        const { instance, accounts } = await createContractInstance();
+        console.log("Successfully created contract instance");
+        console.log("Contract methods:", Object.keys(instance.methods));
+    } catch (error) {
+        console.error("Setup failed:", error);
+    }
+}
 
-module.exports = { web3, connection };
+testSetup();
 
-createContractInstance();
+module.exports = { web3, connection, createContractInstance };
